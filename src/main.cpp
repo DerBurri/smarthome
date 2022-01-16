@@ -4,15 +4,20 @@
 #include <ArduinoOTA.h>
 #include <Adafruit_NeoPixel.h>
 #include <LittleFS.h>
-
+#define numLeds  300
+#define ledPin  D2
 
 #ifndef STASSID
 #define STASSID "Majestix"
 #define STAPSK  "fuzrn6NKfYujtfa"
 #endif
+uint32_t Wheel(byte WheelPos);
+void rainbow(uint8_t wait);
 
 const char* ssid = STASSID;
 const char* password = STAPSK;
+
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(numLeds, ledPin, NEO_GRB + NEO_KHZ800);
 
 void setup() {
   Serial.begin(74880);
@@ -34,7 +39,7 @@ void setup() {
   }
 
   // Port defaults to 8266
-  // ArduinoOTA.setPort(8266);
+  ArduinoOTA.setPort(8266);
 
   // Hostname defaults to esp8266-[ChipID]
   ArduinoOTA.setHostname("esp-ledcontroller-1");
@@ -81,8 +86,39 @@ void setup() {
   Serial.println("Ready");
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
+  strip.begin();
 }
 
 void loop() {
   ArduinoOTA.handle();
+  rainbow(30);
+  delay(10);
+}
+void rainbow(uint8_t wait) {
+  uint16_t i, j;
+
+  for(j=0; j<256; j++) {
+    for(i=0; i<strip.numPixels(); i++) {
+      strip.setPixelColor(i, Wheel((i*1+j) & 255));
+    }
+    strip.show();
+    delay(wait);
+  }
+}
+
+
+// Input a value 0 to 255 to get a color value.
+// The colours are a transition r - g - b - back to r.
+uint32_t Wheel(byte WheelPos) {
+  if(WheelPos < 85) {
+    return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+  } 
+  else if(WheelPos < 170) {
+    WheelPos -= 85;
+    return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
+  } 
+  else {
+    WheelPos -= 170;
+    return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
+  }
 }
