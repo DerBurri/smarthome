@@ -11,6 +11,11 @@
 #define STAPSK  "fuzrn6NKfYujtfa"
 #endif
 
+#define PIN D2
+#define N_LEDS 300
+
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(N_LEDS,PIN,NEO_GRB + NEO_KHZ800);
+
 const char* ssid = STASSID;
 const char* password = STAPSK;
 
@@ -81,6 +86,20 @@ void setup() {
   Serial.println("Ready");
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
+  Serial.println("Initialize NeoPixel Stripe");
+  strip.begin();
+
+  strip.fill(strip.Color(255,255,255));
+  strip.show();
+  delay(5000);
+  strip.clear();
+  strip.show();
+
+    
+  
+  
+
+  
 }
 
 void loop() {
